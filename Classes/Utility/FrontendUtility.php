@@ -188,17 +188,31 @@ class FrontendUtility
      */
     public static function getCurrentUrl()
     {
-        $ret = null;
-
         $TSFE = self::getTsfe();
 
-        if (!empty($TSFE->anchorPrefix)) {
-            $ret = (string)$TSFE->anchorPrefix;
-        } else {
-            $ret = (string)$TSFE->siteScript;
-        }
+        /** @var \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer */
+        $contentObjectRenderer = Typo3GeneralUtility::makeInstance(
+            'TYPO3\\CMS\\Frontend\\ContentObject\\ContentObjectRenderer'
+        );
 
-        return $ret;
+        $exclude = explode(',', $GLOBALS['TYPO3_CONF_VARS']['FE']['cHashExcludedParameters']);
+        if (($key = array_search('L', $exclude)) !== false) {
+            unset($exclude[$key]);
+        }
+        $exclude[] = 'id';
+        $exclude[] = 'type';
+
+        return $contentObjectRenderer->typolink_URL(
+            array(
+                'parameter'         => $TSFE->id . ',' . $TSFE->type,
+                'addQueryString'    => 1,
+                'addQueryString.'   => array(
+                    'method' => 'GET',
+                    'exclude' => implode(',', $exclude),
+                ),
+                'useCacheHash' => Typo3GeneralUtility::_GET('cHash') ? '1' : '0'
+            )
+        );
     }
 
     /**
