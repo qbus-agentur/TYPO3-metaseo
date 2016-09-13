@@ -479,8 +479,14 @@ class MetatagPart extends AbstractPart
         if (!$linkParam) {
             // Fetch pageUrl
             if ($pageHash !== null) {
-                // Virtual plugin page, we have to use anchor or site script
-                $linkParam = FrontendUtility::getCurrentUrl();
+                $linkParam = $GLOBALS['TSFE']->id . ',' . $GLOBALS['TSFE']->type;
+                $linkConf['useCacheHash'] = \TYPO3\CMS\Core\Utility\GeneralUtility::_GET('cHash') ? '1' : '0';
+                $linkConf['addQueryString'] = 1;
+                $linkConf['addQueryString.']['method'] = 'GET';;
+                if (!empty($linkConf['addQueryString.']['exclude'])) {
+                    $linkConf['addQueryString.']['exclude'] .= ',';
+                }
+                $linkConf['addQueryString.']['exclude'] .= 'pk_campaign,pk_kwd,utm_source,utm_medium,utm_campaign,utm_term,utm_content';
             } else {
                 $linkParam = $GLOBALS['TSFE']->id;
             }
